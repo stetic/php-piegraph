@@ -1,7 +1,7 @@
-<?
+<?php
 // +----------------------------------------------------------------------+
-// | PIE Class		         	                                          |
-// | Creating Pie Graphs on the fly			                              |
+// | PIE Class		         	                                          		|
+// | Creating Pie Graphs on the fly			                              		|
 // | Requirements: GD Library >= 2.0                                      |
 // +----------------------------------------------------------------------+
 // | Author: Nico Puhlmann <nico.puhlmann@gmail.com>                      |
@@ -10,51 +10,54 @@
 
 class PieGraph
 {
-    /*
-		 Public vars
+  /*
+		Public vars
 	*/
 	var $pie;
-    var $data;
-    var $legends;
-    var $img_width;
-    var $img_height;
-    var $pie_width;
-    var $pie_height;
-    var $pie_colors;
-    var $pie_color_bg;
-    var $pie_color_text;
-    var $threedee_height;
+  var $data;
+  var $legends;
+  var $img_width;
+  var $img_height;
+  var $pie_width;
+  var $pie_height;
+  var $pie_colors;
+  var $pie_color_bg;
+  var $pie_color_text;
+  var $threedee_height;
 	var $colors_set;
 	var $pre_colors;
 
 	/*
 		Contructor
 	*/
-    function __construct($w=200, $h=150, $data)
-    {
+	function __construct($w=200, $h=150, $data)
+	{
 		if(!function_exists("imagecreatetruecolor"))
 		{
 			die("Error. GD Library >= 2 needed.");
 		}
+		
 		$this->starttime = microtime();
 		$this->display_creation_time = false;
+		
 		asort($data);
-        $this->data 		= array_reverse($data, TRUE);
+		
+		$this->data 		= array_reverse($data, TRUE);
 		$this->pie_width 	= $w;
 		$this->pie_height	= $h;
 		$this->pre_colors	= array(
-									"#DA3600",
-									"#0F84D4",
-									"#F98308",
-									"#42E038",
-									"#A6A6A6",
-									"#2C9232",
-									"#7F0B80",
-									"#DFDE29",
-									"#9F9F9F",
-									"#EDEDED",
-									"#BAE700");
-    }
+															"#DA3600",
+															"#0F84D4",
+															"#F98308",
+															"#42E038",
+															"#A6A6A6",
+															"#2C9232",
+															"#7F0B80",
+															"#DFDE29",
+															"#9F9F9F",
+															"#EDEDED",
+															"#BAE700");
+	}
 
 	/*
 		Converts Hexcolors to RGB
@@ -64,7 +67,7 @@ class PieGraph
 	{
 		$color = ereg_replace('^#','',$hex);
 		$rgb = array(
-					 (16 * hexdec(substr($color,0,1)) + hexdec(substr($color,1,1)) ),
+					 			 (16 * hexdec(substr($color,0,1)) + hexdec(substr($color,1,1)) ),
 		             (16 * hexdec(substr($color,2,1)) + hexdec(substr($color,3,1)) ),
 		             (16 * hexdec(substr($color,4,1)) + hexdec(substr($color,5,1)) )
 					);
@@ -76,10 +79,10 @@ class PieGraph
 	*/
 	function setColors($colors, $bg="FFFFFF", $text="000000", $border="999999")
 	{
-        $this->pie_colors		= ($colors) 			? $colors 					: $this->pre_colors;
-		$this->pie_color_bg		= (strlen($bg)>5) 		? $this->hex2rgb($bg) 		: $this->hex2rgb("FFFFFF");
-		$this->pie_color_text	= (strlen($text)>5)		? $this->hex2rgb($text)		: $this->hex2rgb("000000");
-		$this->pie_color_border	= (strlen($border)>5)	? $this->hex2rgb($border)	: $this->hex2rgb("666666");
+	  $this->pie_colors					= ($colors) 					? $colors 								: $this->pre_colors;
+		$this->pie_color_bg				= (strlen($bg)>5) 		? $this->hex2rgb($bg) 		: $this->hex2rgb("FFFFFF");
+		$this->pie_color_text			= (strlen($text)>5)		? $this->hex2rgb($text)		: $this->hex2rgb("000000");
+		$this->pie_color_border		= (strlen($border)>5)	? $this->hex2rgb($border)	: $this->hex2rgb("666666");
 		$this->pie_color_text_bg	= $this->hex2rgb("F3F3F3");
 		$this->colors_set = true;
 	}
@@ -110,13 +113,13 @@ class PieGraph
 	/*
 		Init the graph and data
 	*/
-    function init()
-    {
+	function init()
+  {
 		if(!$this->colors_set)
 		{
 			$this->setColors($this->pre_colors);
 		}
-        $this->threedee_height = ($this->threedee_height) ? $this->threedee_height : 10; //round($this->pie_width/10);
+    $this->threedee_height = ($this->threedee_height) ? $this->threedee_height : 10; //round($this->pie_width/10);
 		$this->img_width  = $this->pie_width;
 		$this->img_height = $this->pie_height;
 		$this->init_img_width  = $this->pie_width * 3;
@@ -126,6 +129,7 @@ class PieGraph
 		$this->init_3d_height = $this->threedee_height * 3;
 		$this->cx = round ($this->init_width/2);
 		$this->cy = round ($this->init_height/2);
+		
 		/*
 			 init data for the pie
 		*/
@@ -154,10 +158,10 @@ class PieGraph
 			$start = $end;
 			$c++;
 		}
-    }
+	}
 
-    function get_color($num, $mode = "normal")
-    {
+	function get_color($num, $mode = "normal")
+  {
 
 		$tmp_color = $this->hex2rgb( $this->pie_colors[$num] );
 		$tmp_color_3d = array
@@ -166,7 +170,8 @@ class PieGraph
 			( ($tmp_color[1] > 79) ? $tmp_color[1]-80 : 0 ),
 			( ($tmp_color[2] > 79) ? $tmp_color[2]-80 : 0 )
 		);
-	    if($mode=="3d")
+		
+		if($mode=="3d")
 		{
 		 	return ImageColorAllocate($this->pie, $tmp_color_3d[0], $tmp_color_3d[1], $tmp_color_3d[2]);
 		}
@@ -179,16 +184,15 @@ class PieGraph
 	/*
 		Display the graph
 	*/
-    function display()
-    {
+	function display()
+	{
 		$this->init();
 		
-        $this->pie = @ImageCreateTrueColor($this->init_img_width, $this->init_img_height);
+		$this->pie = @ImageCreateTrueColor($this->init_img_width, $this->init_img_height);
+		$colBG = ImageColorAllocate($this->pie, $this->pie_color_bg[0], $this->pie_color_bg[1], $this->pie_color_bg[2]);
+		ImageFill($this->pie, 0, 0, $colBG);
 
-        $colBG = ImageColorAllocate($this->pie, $this->pie_color_bg[0], $this->pie_color_bg[1], $this->pie_color_bg[2]);
-        ImageFill($this->pie, 0, 0, $colBG);
-
-        // Do the 3d effect
+		// Do the 3d effect
 		$this->start_3d = $this->cy + $this->init_3d_height;
 
 		for($i=$this->start_3d;$i > $this->cy; $i--)
@@ -311,7 +315,6 @@ class PieGraph
 		ImageDestroy($this->pie);
 		ImageDestroy($leg_img);
 		ImageDestroy($final);
-    }
+	}
 }
-
 ?>
